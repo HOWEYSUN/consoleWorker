@@ -5,7 +5,7 @@ import os
 root_dir = os.path.dirname(os.path.abspath('.'))
 if logging.root.isEnabledFor(logging.DEBUG):
     logging.debug('root_dir:%s' % root_dir)
-robot_dir = root_dir + "/consoleWorker/consoleRobot/"
+robot_dir = root_dir + "/pythonProject/consoleRobot/"
 if logging.root.isEnabledFor(logging.DEBUG):
     logging.debug('robot_dir:%s' % robot_dir)
 cf = configparser.RawConfigParser()
