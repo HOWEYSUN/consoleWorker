@@ -1,4 +1,3 @@
-import logging
 from webWorker.BasicWebWorker import BasicWebWorker
 
 
@@ -16,5 +15,5 @@ class BaobeiWorker(BasicWebWorker):
         self.driver.get(self.endUrl)
         super().close()
 
-    def setCustomer(self, customer):
-        self.customer = customer
+    def setReport(self, report):
+        self.report = report

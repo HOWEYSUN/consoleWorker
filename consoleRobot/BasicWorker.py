@@ -27,5 +27,9 @@ class BasicWorker:
     def check(self):
         return True
 
+    # 参数检验
+    def Validated(self):
+        return True
+
     def doJob(self):
         pass

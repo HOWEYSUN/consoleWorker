@@ -1,3 +1,23 @@
+class Report:
+    def __init__(self, reportNo):
+        self.reportNo = reportNo
+
+    def __str__(self):
+        return "reportNo:{}".format(self.reportNo)
+
+    def __eq__(self, other) -> bool:
+        return self.reportNo == other.reportNo
+
+    def __hash__(self):
+        return hash(self.reportNo)
+
+    def setCustomer(self, customer):
+        self.customer = customer
+
+    def setProject(self, project):
+        self.project = project
+
+
 class Customer:
     def __init__(self, Id, tel, name, sex):
         self.Id = Id
@@ -5,13 +25,13 @@ class Customer:
         self.name = name
         self.sex = sex
         self.desc = ''
-        self.intentions = []
+        # self.intentions = []
 
     def setDesc(self, desc):
         self.desc = desc
 
-    def addIntentions(self, project):
-        self.intentions.append(project)
+    # def addIntentions(self, project):
+    #     self.intentions.append(project)
 
     def __str__(self):
         return "Id:{},name:{},tel:{},sex:{},desc:{}".format(self.Id, self.name, self.tel, self.sex, self.desc)

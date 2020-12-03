@@ -12,4 +12,8 @@ class BasicRobot:
         return self.worker.getWorkerNo()
 
     def doJob(self):
-        self.worker.do()
+        if self.worker.Validated():
+            self.worker.do()
+        else:
+            logging.error('worker(%s)参数校验不通过！' % self.workerNo)
+            pass
