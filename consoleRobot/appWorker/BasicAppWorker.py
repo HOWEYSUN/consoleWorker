@@ -1,4 +1,4 @@
-# app类型的工人, 基类需要初始化浏览器
+# app类型的工人
 from BasicWorker import BasicWorker
 
 

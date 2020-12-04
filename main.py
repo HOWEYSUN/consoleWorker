@@ -3,6 +3,9 @@ import logging
 import logging.config
 from GlobalVar import root_dir
 from flask import request, Flask
+from multiprocessing import Process
+
+from workshop import initWorkShop
 
 app = Flask(__name__)
 app.debug = True
@@ -21,6 +24,7 @@ def main():
 def baobei(itemNo):
     if logging.root.isEnabledFor(logging.DEBUG):
         logger.debug(f"baobei api接受了一个请求")
+    channelNo = request.args.get('channelNo', '')
     userId = request.args.get('userId', '')
     userName = request.args.get('userName', '')
     tel = request.args.get('tel', '')
@@ -35,7 +39,7 @@ def baobei(itemNo):
         # 设定写入模式
         csv_write = csv.writer(out)
         # 写入具体内容
-        csv_write.writerow([itemNo, userId, userName, tel, sex, desc, projectId, projectName])
+        csv_write.writerow([itemNo, channelNo, userId, userName, tel, sex, desc, projectId, projectName])
         out.close()
 
     return '接收成功!'
@@ -46,6 +50,8 @@ if __name__ == '__main__':
     if logging.root.isEnabledFor(logging.DEBUG):
         logger.debug(root_dir)
     app.run()
+
+
 
 # def woker():
 #     worker = YajubaoWorker()
