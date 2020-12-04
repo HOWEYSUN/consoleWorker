@@ -1,8 +1,9 @@
 import configparser
 import logging
 import os
+from prpcrypt import prpcrypt
 
-projectName='consoleWorker'
+projectName='pythonProject'
 
 root_dir = os.path.dirname(os.path.abspath(projectName))
 if logging.root.isEnabledFor(logging.DEBUG):
@@ -13,7 +14,13 @@ if logging.root.isEnabledFor(logging.DEBUG):
 cf = configparser.RawConfigParser()
 cf.read("worker.conf")
 ErrorLogger = 'errorLogger'
+pc = prpcrypt(cf.get('project', 'robotKey'))
 
+def decrypt(pText):
+     return pc.decrypt(pText)
+
+def encrypt(sText):
+     return pc.encrypt(sText)
 
 # def init():
 #     global config

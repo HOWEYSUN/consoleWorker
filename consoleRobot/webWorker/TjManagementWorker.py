@@ -51,10 +51,10 @@ class TjManagementWorker(BasicWebWorker):
 
         self.driver.find_element_by_xpath(
             '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[1]/input').send_keys(
-            GlobalVar.cf.get('workShop', 'tj.userName'))
+            GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'tj.userName')))
         self.driver.find_element_by_xpath(
             '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[2]/input').send_keys(
-            GlobalVar.cf.get('workShop', 'tj.pwd'))
+            GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'tj.pwd')))
         time.sleep(1)
         slideblock = self.driver.find_element_by_xpath('//*[@id="nc_1_n1z"]')
         # 鼠标点击滑动块不松开

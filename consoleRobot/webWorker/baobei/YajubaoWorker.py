@@ -143,9 +143,9 @@ class YajubaoWorker(BaobeiWorker):
         try:
             super().doLogin()
             WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_xpath('//input[@type="number"]')) \
-                .send_keys(GlobalVar.cf.get('workShop', 'yajubao.userName'))
+                .send_keys(GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'yajubao.userName')))
             self.driver.find_element_by_xpath('//input[@type="password"]') \
-                .send_keys(GlobalVar.cf.get('workShop', 'yajubao.pwd'))
+                .send_keys(GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'yajubao.pwd')))
             self.driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div/div/div[2]/div[1]/div[2]/div[1]/form/button').click()
             self.loginFlag = True

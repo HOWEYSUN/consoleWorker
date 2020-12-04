@@ -1,4 +1,3 @@
-# ke.com百科爬虫
 # coding=UTF-8
 import csv
 import importlib
@@ -7,7 +6,7 @@ import logging.config
 import queue
 
 import threading
-import re, time
+import time
 import traceback
 
 import GlobalVar
