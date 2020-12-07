@@ -1,4 +1,8 @@
+import csv
 import logging
+import time
+import traceback
+
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -28,21 +32,56 @@ class BasicWorker:
     def getWorkerNo(self):
         return self.workerNo
 
-    # 自检
-    # 需要爬取其他系统及网站的worker都应重写次方法，
-    # 目的是给定时巡检程序判断该工人是否可用，若不可用应及时修正
     def check(self):
+        """
+        # 自检
+        # 需要爬取其他系统及网站的worker都应重写次方法，
+        # 目的是给定时巡检程序判断该工人是否可用，若不可用应及时修正
+        :return: 该工人是否检测通过
+        """
         return True
 
     # 参数检验
     def Validated(self):
+        """
+        校验传给工人的参数是否正确
+        :return: 参数校验是否通过
+        """
         return True
 
-    """
-所有具体的实现类都必须重写此方法
-    """
     def do(self):
+        """
+            所有具体的实现类都必须重写此方法
+        :return: 工作结果
+        """
         pass
+
+    def writeLog(self, itemNo, execLog, logLevel='debug'):
+        if logging.root.isEnabledFor(logging.DEBUG):
+            logging.debug(f"logLevel({0}) - itemNo({1}) execute mess:{2}".format(logLevel, itemNo, execLog))
+
+        # 是否配置将日志写入文件
+        if GlobalVar.cf.get("worker", "isSaveExecLog")\
+                or logLevel == 'error':
+            out = open('./executeLog.csv', 'a', newline='', encoding='utf-8')
+            # 设定写入模式
+            csv_write = csv.writer(out)
+            # 写入具体内容
+            csv_write.writerow([itemNo, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), execLog])
+            out.close()
+
+    def handleCvs(self, itemNo, workerStatue='working'):
+        if logging.root.isEnabledFor(logging.DEBUG):
+            logging.debug(f"write itemNo(%s)'s logs into cvs..." % itemNo)
+        self.writeLog(itemNo, workerStatue)
+        # if logging.root.isEnabledFor(logging.DEBUG):
+        #     logging.debug(f"write itemNo(%s) into reportHandled..." % itemNo)
+        # out = open('reportHandled.csv', 'a', newline='', encoding='utf-8')
+        # # 设定写入模式
+        # csv_write = csv.writer(out)
+        # # 写入具体内容
+        # csv_write.writerow([itemNo, workerStatue])
+        # out.close()
 
 
 class BasicWebWorker(BasicWorker):
@@ -65,10 +104,10 @@ class BasicWebWorker(BasicWorker):
         # 去除浏览器自动测试软件的提示
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation']);
 
-        chrome_options.add_argument(GlobalVar.cf.get("setting", "userAgent"))
-        if GlobalVar.cf.get("setting", "executablePath"):
+        chrome_options.add_argument(GlobalVar.cf.get("workShop", "userAgent"))
+        if GlobalVar.cf.get("workShop", "executablePath"):
             self.driver = webdriver.Chrome(options=chrome_options,
-                                           executable_path=GlobalVar.cf.get("setting", "executablePath"))
+                                           executable_path=GlobalVar.cf.get("workShop", "executablePath"))
         else:
             self.driver = webdriver.Chrome(options=chrome_options)
 
@@ -82,6 +121,10 @@ class BasicWebWorker(BasicWorker):
         if logging.root.isEnabledFor(logging.DEBUG):
             logging.debug('worker(%s) 谷歌浏览器初始化完成！' % self.workerNo)
         # end todo =========写死的谷歌浏览器配置，后续应做成配置化============
+
+    # 进入登录页
+    def doLogin(self):
+        self.driver.get(self.initUrl)
 
     def close(self):
         self.driver.quit()
@@ -97,8 +140,14 @@ class BasicWebWorker(BasicWorker):
             return False
         return True
 
+    def logErrorMess(self, e, where):
+        logging.error('worker({0}) work occur:{1} on ({2})！'.format(self.workerNo, str(e), where))
+        logging.error("error mess:%s" % traceback.format_exc())
+        mess = where+':'+str(e)
+        self.writeLog(self.workerNo, mess, 'error')
 
-class BaobeiWorker(BasicWebWorker):
+
+class ReportWorker(BasicWebWorker):
     """
         报备类型的工人, 基类增加了报备单的设置（setReport）和登录页做为入口，以及退出页的跳转
     """
@@ -108,13 +157,14 @@ class BaobeiWorker(BasicWebWorker):
         self.initUrl = loginUrl
         self.endUrl = logoutUrl
 
-    # 进入登录页
-    def doLogin(self):
-        self.driver.get(self.initUrl)
-
     def close(self):
         self.driver.get(self.endUrl)
         super().close()
 
     def setReport(self, report):
         self.report = report
+
+    def logErrorMess(self, e, where):
+        logging.error('worker({0}) work for report({1}) occur:{2} on ({3})！'.format(self.workerNo, self.report.reportNo, str(e), where))
+        logging.error("error mess:%s" % traceback.format_exc())
+        self.writeLog(self, self.report.reportNo, where+':'+str(e), 'error')

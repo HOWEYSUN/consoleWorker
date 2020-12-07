@@ -3,11 +3,11 @@ import logging
 import os
 from prpcrypt import prpcrypt
 
-projectName='pythonProject'
+projectName = 'pythonProject'
 
 root_dir = os.path.dirname(os.path.abspath(projectName))
 if logging.root.isEnabledFor(logging.DEBUG):
-     logging.debug('root_dir:%s' % root_dir)
+    logging.debug('root_dir:%s' % root_dir)
 # robot_dir = root_dir + "/pythonProject/consoleRobot/"
 # if logging.root.isEnabledFor(logging.DEBUG):
 #     logging.debug('robot_dir:%s' % robot_dir)
@@ -16,20 +16,10 @@ cf.read("worker.conf")
 ErrorLogger = 'errorLogger'
 pc = prpcrypt(cf.get('project', 'robotKey'))
 
+
 def decrypt(pText):
-     return pc.decrypt(pText)
+    return pc.decrypt(pText)
+
 
 def encrypt(sText):
-     return pc.encrypt(sText)
-
-# def init():
-#     global config
-#     config = {}
-#
-#
-# def set(key, value):
-#     config[key] = value
-#
-#
-# def get(key):
-#     return config[key]
+    return pc.encrypt(sText)

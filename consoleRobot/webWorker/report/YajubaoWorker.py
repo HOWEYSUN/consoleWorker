@@ -7,10 +7,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
 import GlobalVar
-from BasicWorker import BaobeiWorker
+from BasicWorker import ReportWorker
 
 
-class YajubaoWorker(BaobeiWorker):
+class YajubaoWorker(ReportWorker):
     """
         雅居宝渠道报备员，工号WF0104001，属于集团客服中心的第一个员工
         主要处理雅居宝wap端的报备工作
@@ -24,9 +24,7 @@ class YajubaoWorker(BaobeiWorker):
         # 001自增编号
         super().__init__('WF01040001', loginUrl, logoutUrl)
 
-    def logErrorMess(self, e, where):
-        logging.error('worker({0}) work for report({1}) occur:{2} on ({3})！'.format(self.workerNo, self.report.reportNo, str(e), where))
-        logging.error("error mess:%s" % traceback.format_exc())
+
 
     def do(self):
         customer = self.report.customer
@@ -36,9 +34,8 @@ class YajubaoWorker(BaobeiWorker):
             logging.error('worker({}) 处理{}({})的报备信息缺少楼盘信息！'.format(self.workerNo, customer.name, customer.Id))
             return False
 
-        if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug('进入初始页(%s)' % self.initUrl)
-            logging.debug('开始对{}({})的报备信息进行处理！'.format(customer.name, customer.Id))
+        self.writeLog(self.report.reportNo, '进入初始页({0}), 开始对{1}({2})的报备信息进行处理！'
+                      .format(self.initUrl, customer.name, customer.Id))
         if not self.doLogin():
             self.loginFlag = False
             return False
@@ -46,8 +43,7 @@ class YajubaoWorker(BaobeiWorker):
             WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_css_selector('.search-like')).click()
             self.driver.find_element_by_css_selector('.search-like').send_keys(project.name)
             self.driver.find_element_by_css_selector('.icon-search').click()
-            if logging.root.isEnabledFor(logging.DEBUG):
-                logging.debug('搜索%s项目' % project.name)
+            self.writeLog(self.report.reportNo, '搜索%s项目' % project.name)
             WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_css_selector('.wxmessage-form-container__btn')) \
                 .click()
         except NoSuchElementException as ex:
@@ -63,7 +59,7 @@ class YajubaoWorker(BaobeiWorker):
                 lambda x: x.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[6]/div/textarea')) \
                 .send_keys(customer.desc)
             self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[2]/div[1]/input').send_keys(customer.name)
-            if customer.sex == 0:
+            if int(customer.sex) == 0:
                 self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[2]/div').click()
             else:
                 self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[1]/div').click()
@@ -80,8 +76,7 @@ class YajubaoWorker(BaobeiWorker):
         # self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[8]/form/button').click()
 
         self.driver.save_screenshot('%s.png' % self.report.reportNo)
-        if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug('进入报备页面并拍照成功！')
+        self.writeLog(self.report.reportNo, '进入报备页面并拍照成功！')
 
     # 检测方法最好可以覆盖doJob中所有页面中的元素标识
     def check(self):
@@ -90,6 +85,7 @@ class YajubaoWorker(BaobeiWorker):
         # ======================登录页==========================
         if not self.doLogin():
             self.loginFlag = False
+            self.writeLog(self.report.reportNo, '登录失败！')
             return False
         # ======================登录页==========================
 
@@ -149,8 +145,7 @@ class YajubaoWorker(BaobeiWorker):
             self.driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div/div/div[2]/div[1]/div[2]/div[1]/form/button').click()
             self.loginFlag = True
-            if logging.root.isEnabledFor(logging.DEBUG):
-                logging.debug('登录成功')
+            self.writeLog(self.report.reportNo, '登录成功')
         except NoSuchElementException as ex:
             self.logErrorMess(ex, 'doLogin function')
             return False
@@ -170,4 +165,3 @@ class YajubaoWorker(BaobeiWorker):
         except Exception as e:
             self.logErrorMess(e, 'close function')
             return False
-

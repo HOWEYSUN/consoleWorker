@@ -11,7 +11,7 @@ import traceback
 
 import GlobalVar
 from BasicRobot import BasicRobot
-from webWorker.baobei.baobeiModel import Customer, BuildingProject, Report
+from webWorker.report.ReportModel import Customer, BuildingProject, Report
 
 
 class WorkShop:
@@ -30,7 +30,6 @@ class WorkShop:
             # 移除队列前部的指定数量的单号
             self.doneItems = self.doneItems[GlobalVar.cf.getint('workShop', 'popNum'):]
         self.doneItems.append(itemNo)
-        self.handleCvs(itemNo)
         if logging.root.isEnabledFor(logging.DEBUG):
             logging.debug(f'doneItems(%s)' % self.doneItems)
 
@@ -60,7 +59,7 @@ class WorkShop:
         report.setCustomer(customer)
         report.setProject(project)
 
-        #根据渠道ID来获取配置中指定的员工类
+        # 根据渠道ID来获取配置中指定的员工类
         workerModuleName = GlobalVar.cf.get('api', channelNo)
         workerModuleObj = importlib.import_module('.' + workerModuleName, self.workerPackage)
         workerObj = getattr(workerModuleObj, workerModuleName)
@@ -72,25 +71,14 @@ class WorkShop:
             logging.debug("worker({0}) is process the report({1})".format(robot.getWorkerNo(), itemNo))
         try:
             robot.doJob()
-            self.handleCvs(itemNo, 'done')
+            worker.handleCvs(itemNo, '操作完成')
         except Exception as e:
             logging.error("worker({0}) handle report({1}) failed".format(robot.getWorkerNo(), itemNo))
             logging.error("error mess:%s" % traceback.format_exc())
-            self.handleCvs(itemNo, 'failed')
+            worker.handleCvs(itemNo, 'failed')
 
         time.sleep(2)
         robot.close()
-
-
-    def handleCvs(self, itemNo, workerStatue='working'):
-        if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug(f"write itemNo(%s) into reportHandled..." % itemNo)
-        out = open('reportHandled.csv', 'a', newline='', encoding='utf-8')
-        # 设定写入模式
-        csv_write = csv.writer(out)
-        # 写入具体内容
-        csv_write.writerow([itemNo, workerStatue])
-        out.close()
 
     def doTask(self, itemQueue):
         """
@@ -101,7 +89,7 @@ class WorkShop:
         while 1:
             if itemQueue.empty():
                 time.sleep(10)
-            self.work(itemQueue.get())#若队列中有待处理的单则取出处理
+            self.work(itemQueue.get())  # 若队列中有待处理的单则取出处理
 
     def controller(self, itemQueue):
         """
@@ -117,39 +105,36 @@ class WorkShop:
                 with open('customer.csv', 'r', encoding='utf-8') as csvfile:
                     csv_reader = csv.reader(csvfile)
                     for excel_data in csv_reader:
-                        if len(excel_data)<=0:
+                        if len(excel_data) <= 0:
                             continue
                         itemNo = excel_data[0]
-                        if self.isDoneItem(itemNo):#判断该单据是否处理过
+                        if self.isDoneItem(itemNo):  # 判断该单据是否处理过
                             continue
-                        self.addDoneItem(itemNo)#将需要处理的单号置为已处理 #todo 这里需要考虑操作失败时的策略
-                        itemQueue.put(excel_data)#将需要处理的单号丢进队列里
+                        self.addDoneItem(itemNo)  # 将需要处理的单号置为已处理 #todo 这里需要考虑操作失败时的策略
+                        itemQueue.put(excel_data)  # 将需要处理的单号丢进队列里
                 time.sleep(30)
 
 
 def initWorkShop(workerNum=0):
     """
     初始化工作间
-    :param workerNum: 操作单队列
+    :param workerNum: 工作间工作者数量
     :return: None
     """
     # 初始化日志配置
     logging.config.fileConfig('logging.conf')
-
-    # create logger
-    global logger
-    logger = logging.getLogger('root')
-
-    workerShop = WorkShop(GlobalVar.cf.get('workShop', 'baobeiWorkerPackage'))
+    # 配置工作间工种
+    workerShop = WorkShop(GlobalVar.cf.get('workShop', 'reportWorkerPackage'))
     itemQueue = queue.Queue()
     threads = []
+    # 创建监工线程
     wokerThread = threading.Thread(name='workShop(controller)', target=WorkShop.controller,
                                    args=(workerShop, itemQueue,))
     wokerThread.start()
-    if workerNum <= 0 :#若初始化工作者人数为负数或为空则从配置中获得
+    if workerNum <= 0:  # 若初始化工作者人数为负数或为空则从配置中获得
         workerNum = GlobalVar.cf.getint('workShop', 'workerNum')
 
-    # 按配置开起子线程
+    # 按配置开起工作者子线程
     for i in range(0, workerNum):
         t = threading.Thread(name='workShop(No%s_worker)' % i, target=WorkShop.doTask,
                              args=(workerShop, itemQueue,))
