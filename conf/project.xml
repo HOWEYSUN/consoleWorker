@@ -1,28 +1,35 @@
 <?xml version="1.0"?>
-<bean name="tjManager" workerModuleObj="consoleRobot.webWorker.tjManager" workerModuleName="TjManagementWorker" >
-    <page name="initUrl" url="https://passport.tujia.com/PortalSite/LoginPage/">
-        <location by="xpath" value="//*[@id='nc_1_n1z']" waitUtil="True" wailTime="10">
-            <ation by="click_and_hold"/>
-            <ation by="perform" timeSleep="0.1"/>
-            <ation by="move_by_offset" value="xoffset=50,yoffset=0" />
-            <ation by="perform" timeSleep="0.1"/>
-            <ation by="move_by_offset" value="xoffset=260,yoffset=0"/>
-            <ation by="perform" timeSleep="0.1"/>
-            <ation by="release"/>
-            <ation by="perform" timeSleep="0.1"/>
-        </location>
-        <location by="xpath" value="//*[@id='app']/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[1]/input"
-                  callback="setUserName" />
-        <location by="xpath" value="//*[@id='app']/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[2]/input"
-                  callback="setPwd" />
-        <location by="xpath" value="//*[@id='app']/section/section[1]/section[3]/section[1]/div[2]/button">
-            <ation by="click"/>
-        </location>
-    </page>
-    <page name="mainPage" url="location">
-        <location updated="yes">5</location>
-    </page>
-    <page name="orderList" url="location">
-        <location updated="yes">5</location>
-    </page>
-</bean>
+<beans>
+    <bean name="tjManager" modulePackage="consoleRobot.webWorker.tjManager" moduleName="TjManagementWorker" >
+        <page name="initUrl" url="https://passport.tujia.com/PortalSite/LoginPage/">
+            <location name="slideblock" by="xpath" value="//*[@id='nc_1_n1z']"
+                      waitUtil="True" waitTime="10" callback="doLogin" />
+        </page>
+        <page name="mainPage" url="location">
+            <location name="mainPageUrl" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a" waitUtil="True" waitTime="10">
+                <action by="click" callback="tackScreenshot"/>
+            </location>
+        </page>
+    </bean>
+    <bean name="yajubaoWorker" modulePackage="consoleRobot.webWorker.report" moduleName="YajubaoWorker" >
+        <page name="initUrl" url="https://webapp.mypaas.com.cn/b2c/yk_qmyx/prod/login?tenant_code=agile">
+            <location name="username" by="xpath" value="//input[@type='number']"
+                      waitUtil="True" waitTime="10" callback="doLogin" />
+        </page>
+        <page name="searchPage" url="location">
+            <location name="searchBar" by="css_selector" value=".search-like"
+                      waitUtil="True" waitTime="10" callback="doSearch" />
+            <location name="toReportButton" by="css_selector" value=".wxmessage-form-container__btn"
+                      waitUtil="True" waitTime="10">
+                <action by="click"/>
+            </location>
+        </page>
+        <page name="reportFormPage" url="location">
+            <location name="desc" by="xpath" value="//*[@id='app']/div/div/div/div/div[6]/div/textarea"
+                      waitUtil="True" waitTime="10" callback="setReportForm" />
+            <location name="formSubmit" by="xpath" value="//*[@id='app']/div/div/div/div/div[8]/form/button">
+                <action by="click" callback="tackScreenshot"/>
+            </location>
+        </page>
+    </bean>
+</beans>
