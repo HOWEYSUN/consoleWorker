@@ -102,6 +102,7 @@ class TjManagementWorker(BasicWebWorker):
         WebDriverWait(self.driver, 10) \
             .until(lambda x: x.find_element_by_xpath('//*[@id="app"]/div/nav/ul/li[1]/div/a')).click()
         self.writeLog(self.workerNo, '已跳转至订单列表')
+        self.driver.save_screenshot(GlobalVar.project_path + '/export/%s.png' % self.workerNo)
         # self.driver.get('https://guanjia.tujia.com/trademanagement/orderlist')
 
     # 检测方法最好可以覆盖doJob中所有页面中的元素标识
@@ -112,21 +113,21 @@ class TjManagementWorker(BasicWebWorker):
         self.driver.get(self.initUrl)
         time.sleep(3)
         # 用户名
-        if not super().checkElement(By.Xpath,
+        if not self.checkElement(By.Xpath,
                                     '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[1]/input'):
             return False
 
         # 密码
-        if not super().checkElement(By.Xpath,
+        if not self.checkElement(By.Xpath,
                                     '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[2]/input'):
             return False
 
         # 滚动条
-        if not super().checkElement(By.Xpath, '//*[@id="nc_1_n1z"]'):
+        if not self.checkElement(By.Xpath, '//*[@id="nc_1_n1z"]'):
             return False
 
         # 提交按钮
-        if not super().checkElement(By.Xpath, '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/button'):
+        if not self.checkElement(By.Xpath, '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/button'):
             return False
         # ======================起始页==========================
         if logging.root.isEnabledFor(logging.DEBUG):

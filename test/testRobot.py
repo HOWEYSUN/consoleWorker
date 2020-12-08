@@ -1,8 +1,5 @@
 # utf-8
 import importlib
-import logging
-from logging import config, handlers
-from os import path
 from BasicRobot import BasicRobot
 import GlobalVar
 
@@ -16,7 +13,7 @@ def main():
 
     # 然后调用途家worker(为了绕过途家的检测，无奈之举)
     workerModuleName = 'TjManagementWorker'
-    workerModuleObj = importlib.import_module('.' + workerModuleName, 'consoleRobot.webWorker')
+    workerModuleObj = importlib.import_module('.' + workerModuleName, 'consoleRobot.webWorker.tjManager')
     workerObj = getattr(workerModuleObj, workerModuleName)
     worker = workerObj()
 

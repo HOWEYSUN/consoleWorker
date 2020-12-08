@@ -63,7 +63,7 @@ class BasicWorker:
         # 是否配置将日志写入文件
         if GlobalVar.cf.get("worker", "isSaveExecLog")\
                 or logLevel == 'error':
-            out = open('export/executeLog.csv', 'a', newline='', encoding='utf-8')
+            out = open(GlobalVar.project_path + '/export/executeLog.csv', 'a', newline='', encoding='utf-8')
             # 设定写入模式
             csv_write = csv.writer(out)
             # 写入具体内容
