@@ -1,19 +1,24 @@
 import configparser
 import logging
-import os
-from prpcrypt import prpcrypt
+from os import path
+from util.prpcrypt import prpcrypt
 
-projectName = 'pythonProject'
+localProjectName = 'pythonProject'
+logConf_file_path = path.join(path.dirname(path.abspath(localProjectName)), 'conf/logging.conf')
+projectConf_file_path = path.join(path.dirname(path.abspath(localProjectName)), 'conf/worker.conf')
 
-root_dir = os.path.dirname(os.path.abspath(projectName))
+# 初始化日志配置
+logging.config.fileConfig(logConf_file_path)
+
 if logging.root.isEnabledFor(logging.DEBUG):
-    logging.debug('root_dir:%s' % root_dir)
-# robot_dir = root_dir + "/pythonProject/consoleRobot/"
-# if logging.root.isEnabledFor(logging.DEBUG):
-#     logging.debug('robot_dir:%s' % robot_dir)
+    logging.debug('log configure file:%s' % logConf_file_path)
+    logging.debug('project configure file:%s' % projectConf_file_path)
+
+# 读取项目配置文件
 cf = configparser.RawConfigParser()
-cf.read("worker.conf")
-ErrorLogger = 'errorLogger'
+cf.read(projectConf_file_path)
+
+# 初始化加密类实例
 pc = prpcrypt(cf.get('project', 'robotKey'))
 
 

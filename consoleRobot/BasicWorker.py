@@ -58,12 +58,12 @@ class BasicWorker:
 
     def writeLog(self, itemNo, execLog, logLevel='debug'):
         if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug(f"logLevel({0}) - itemNo({1}) execute mess:{2}".format(logLevel, itemNo, execLog))
+            logging.debug("logLevel({0}) - itemNo({1}) execute mess:{2}".format(logLevel, itemNo, execLog))
 
         # 是否配置将日志写入文件
         if GlobalVar.cf.get("worker", "isSaveExecLog")\
                 or logLevel == 'error':
-            out = open('./executeLog.csv', 'a', newline='', encoding='utf-8')
+            out = open('export/executeLog.csv', 'a', newline='', encoding='utf-8')
             # 设定写入模式
             csv_write = csv.writer(out)
             # 写入具体内容

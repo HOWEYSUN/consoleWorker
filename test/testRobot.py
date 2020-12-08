@@ -2,17 +2,12 @@
 import importlib
 import logging
 from logging import config, handlers
-
+from os import path
 from BasicRobot import BasicRobot
+import GlobalVar
 
 
 def main():
-    # 初始化日志配置
-    logging.config.fileConfig('logging.conf')
-
-    # create logger
-    global logger
-    logger = logging.getLogger('root')
 
     # 先后台打开一个浏览器
     chromeDriver = 'C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe '

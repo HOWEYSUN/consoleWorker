@@ -34,7 +34,7 @@ class TjManagementWorker(BasicWebWorker):
         chrome_options.add_argument(GlobalVar.cf.get("workShop", "userAgent"))
         if GlobalVar.cf.get("workShop", "executablePath"):
             self.driver = webdriver.Chrome(options=chrome_options,
-                                           executable_path=GlobalVar.cf.get("setting", "executablePath"))
+                                           executable_path=GlobalVar.cf.get("workShop", "executablePath"))
         else:
             self.driver = webdriver.Chrome(options=chrome_options)
 
@@ -86,7 +86,7 @@ class TjManagementWorker(BasicWebWorker):
 
     def do(self):
         if not self.doLogin():
-            self.writeLog(self.workerNo, '登录失败！')
+            self.writeLog(self.workerNo, '登录失败！', 'error')
             return False
 
         # 进入业主后台

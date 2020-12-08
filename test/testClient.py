@@ -72,13 +72,4 @@ def main():
 
 
 if __name__ == '__main__':
-    userPassword = "123456"
-    unkownPassword = base64.b64encode(bytes(userPassword, 'utf-8'))
-    print("加密后：" + str(unkownPassword, 'utf-8'))
-    unkownPassword = base64.urlsafe_b64encode(bytes(userPassword, 'utf-8'))
-    unkownPassword = base64.urlsafe_b64decode(unkownPassword)
-    print("解密后：" + str(unkownPassword, 'utf-8'))
-
-    # driver = webdriver.Firefox()
-    # driver.get('http://www.wofang.com')
-    # main()
+    main()

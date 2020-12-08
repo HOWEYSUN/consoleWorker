@@ -102,7 +102,7 @@ class WorkShop:
                 if logging.root.isEnabledFor(logging.DEBUG):
                     logging.debug(f"读取文件获取执行任务")
                 # todo 这里取操作单的操作应从数据库中获取
-                with open('customer.csv', 'r', encoding='utf-8') as csvfile:
+                with open('export/customer.csv', 'r', encoding='utf-8') as csvfile:
                     csv_reader = csv.reader(csvfile)
                     for excel_data in csv_reader:
                         if len(excel_data) <= 0:
@@ -122,7 +122,7 @@ def initWorkShop(workerNum=0):
     :return: None
     """
     # 初始化日志配置
-    logging.config.fileConfig('logging.conf')
+    logging.config.fileConfig('conf/logging.conf')
     # 配置工作间工种
     workerShop = WorkShop(GlobalVar.cf.get('workShop', 'reportWorkerPackage'))
     itemQueue = queue.Queue()
