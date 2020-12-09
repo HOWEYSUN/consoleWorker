@@ -2,7 +2,8 @@
 
 
 class Bean:
-    def __init__(self, name, moduleName, modulePackage):
+    def __init__(self, workerNo, name, moduleName, modulePackage):
+        self.workerNo = workerNo
         self.name = name
         self.moduleName = moduleName
         self.modulePackage = modulePackage
@@ -10,14 +11,14 @@ class Bean:
         self.callback = None
 
     def __str__(self):
-        return "name:{}, moduleName:{}, modulePackage:{}, callback:{}"\
-            .format(self.name, self.moduleName, self.modulePackage, self.callback)
+        return "workerNo:{}, name:{}, moduleName:{}, modulePackage:{}, callback:{}"\
+            .format(self.workerNo, self.name, self.moduleName, self.modulePackage, self.callback)
 
     def __eq__(self, other) -> bool:
-        return self.name == other.name
+        return self.workerNo == other.workerNo
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.workerNo)
 
     def addPage(self, page):
         self.pages.append(page)

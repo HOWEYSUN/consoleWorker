@@ -13,11 +13,16 @@ from BasicWorker import BasicWebWorker
 
 
 class TjManagementWorker(BasicWebWorker):
+    """
+        tujia系统同步员，工号WF01140001，属于住我房的第一个员工
+        主要处理tujia PC端后台系统的同步工作
+    """
+
     def __init__(self):
         # 01集团
-        # 18住我房
-        # 03自增编号
-        super().__init__('WF0118001')
+        # 14住我房
+        # 0001自增编号
+        super().__init__('WF01140001')
         self.initUrl = 'https://passport.tujia.com/PortalSite/LoginPage/'
         self.loginFlag = False
 

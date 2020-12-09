@@ -1,22 +1,26 @@
 <?xml version="1.0"?>
 <beans>
-    <bean name="tjManager" modulePackage="consoleRobot.webWorker.tjManager" moduleName="TjManagementWorker" >
-        <page name="initUrl" url="https://passport.tujia.com/PortalSite/LoginPage/">
+    <bean workerNo="WF01140001" name="tjManager" modulePackage="consoleRobot.webWorker.tjManager"
+          moduleName="TjManagementWorker" >
+        <page name="initUrl" url="https://passport.tujia.com/PortalSite/LoginPage/" desc="后台登录">
             <location name="slideblock" by="xpath" value="//*[@id='nc_1_n1z']"
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
-        <page name="mainPage" url="location">
-            <location name="mainPageUrl" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a" waitUtil="True" waitTime="10">
+        <page name="mainPage" url="location" desc="进入后台主页">
+            <location name="mainPageUrl" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a"
+                      waitUtil="True" waitTime="10">
                 <action by="click" callback="tackScreenshot"/>
             </location>
         </page>
     </bean>
-    <bean name="yajubaoWorker" modulePackage="consoleRobot.webWorker.report" moduleName="YajubaoWorker" >
-        <page name="initUrl" url="https://webapp.mypaas.com.cn/b2c/yk_qmyx/prod/login?tenant_code=agile">
+    <bean workerNo="WF01040001" name="yajubaoWorker" modulePackage="consoleRobot.webWorker.report"
+          moduleName="YajubaoWorker" >
+        <page name="initUrl" url="https://webapp.mypaas.com.cn/b2c/yk_qmyx/prod/login?tenant_code=agile"
+              desc="登录报备后台">
             <location name="username" by="xpath" value="//input[@type='number']"
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
-        <page name="searchPage" url="location">
+        <page name="searchPage" url="location" desc="搜索项目">
             <location name="searchBar" by="css_selector" value=".search-like"
                       waitUtil="True" waitTime="10" callback="doSearch" />
             <location name="toReportButton" by="css_selector" value=".wxmessage-form-container__btn"
@@ -24,7 +28,7 @@
                 <action by="click"/>
             </location>
         </page>
-        <page name="reportFormPage" url="location">
+        <page name="reportFormPage" url="location" desc="项目报备填报">
             <location name="desc" by="xpath" value="//*[@id='app']/div/div/div/div/div[6]/div/textarea"
                       waitUtil="True" waitTime="10" callback="setReportForm" />
             <location name="formSubmit" by="xpath" value="//*[@id='app']/div/div/div/div/div[8]/form/button">

@@ -4,14 +4,11 @@ from logging import config
 from os import path
 from util.prpcrypt import prpcrypt
 
-localProjectName = 'consoleWorker'
+localProjectName = 'pythonProject'
 root_path = path.join(path.dirname(__file__).split(localProjectName)[0])
 project_path = path.join(root_path, localProjectName)
 logConf_file_path = path.join(root_path, localProjectName+'/conf/logging.conf')
 projectConf_file_path = path.join(root_path, localProjectName+'/conf/worker.conf')
-print(project_path)
-print(logConf_file_path)
-print(projectConf_file_path)
 # 初始化日志配置
 logging.config.fileConfig(logConf_file_path)
 

@@ -13,7 +13,8 @@ class ProjectBeanBuilder(BasicBeanBuilder):
             self.beans.append(self.initBean(beanElement))
 
     def initBean(self, beanElement):
-        bean = Bean(beanElement.get('name'), beanElement.get('moduleName'), beanElement.get('modulePackage'))
+        bean = Bean(beanElement.get('workerNo'), beanElement.get('name'),
+                    beanElement.get('moduleName'), beanElement.get('modulePackage'))
         if beanElement.get('callback'):
             bean.setCallback(beanElement.get('callback'))
 
