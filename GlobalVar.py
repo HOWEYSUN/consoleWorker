@@ -2,6 +2,8 @@ import configparser
 import logging
 from logging import config
 from os import path
+
+from beanBuilder.ProjectBeanBuilder import ProjectBeanBuilder
 from util.prpcrypt import prpcrypt
 
 localProjectName = 'pythonProject'
@@ -22,6 +24,8 @@ cf.read(projectConf_file_path)
 
 # 初始化加密类实例
 pc = prpcrypt(cf.get('project', 'robotKey'))
+beanBuilder = ProjectBeanBuilder()
+beanBuilder.initBeans()
 
 
 def decrypt(pText):

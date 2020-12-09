@@ -6,11 +6,15 @@ from beanBuilder.ProjectBean import Bean, Page, Location, Action
 class ProjectBeanBuilder(BasicBeanBuilder):
     def __init__(self):
         super().__init__()
-        self.beans = []
+        self._beans = dict()
+
+    def getBeanByWorkerNo(self, workerNo):
+        return self._beans.get(workerNo)
 
     def initBeans(self):
         for beanElement in self.getAllBean():
-            self.beans.append(self.initBean(beanElement))
+            projectBean = self.initBean(beanElement)
+            self._beans.__setattr__(projectBean.workerNo, projectBean)
 
     def initBean(self, beanElement):
         bean = Bean(beanElement.get('workerNo'), beanElement.get('name'),

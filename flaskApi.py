@@ -26,6 +26,7 @@ def report(reportNo):
     projectName = request.args.get('projectName', '')
 
     if userId:
+        # todo 需要调整为DB存储
         # 打开文件，追加a
         out = open(GlobalVar.project_path + '/export/customer.csv', 'a', newline='', encoding='utf-8')
         # 设定写入模式

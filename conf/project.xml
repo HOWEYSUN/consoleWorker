@@ -6,7 +6,7 @@
             <location name="slideblock" by="xpath" value="//*[@id='nc_1_n1z']"
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
-        <page name="mainPage" url="location" desc="进入后台主页">
+        <page name="mainPage" desc="进入后台主页">
             <location name="mainPageUrl" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a"
                       waitUtil="True" waitTime="10">
                 <action by="click" callback="tackScreenshot"/>
@@ -20,7 +20,7 @@
             <location name="username" by="xpath" value="//input[@type='number']"
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
-        <page name="searchPage" url="location" desc="搜索项目">
+        <page name="searchPage" desc="搜索项目">
             <location name="searchBar" by="css_selector" value=".search-like"
                       waitUtil="True" waitTime="10" callback="doSearch" />
             <location name="toReportButton" by="css_selector" value=".wxmessage-form-container__btn"
@@ -28,7 +28,7 @@
                 <action by="click"/>
             </location>
         </page>
-        <page name="reportFormPage" url="location" desc="项目报备填报">
+        <page name="reportFormPage" desc="项目报备填报">
             <location name="desc" by="xpath" value="//*[@id='app']/div/div/div/div/div[6]/div/textarea"
                       waitUtil="True" waitTime="10" callback="setReportForm" />
             <location name="formSubmit" by="xpath" value="//*[@id='app']/div/div/div/div/div[8]/form/button">

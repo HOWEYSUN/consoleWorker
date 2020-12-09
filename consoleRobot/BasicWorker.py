@@ -1,15 +1,17 @@
 import csv
 import logging
+import threading
 import time
 import traceback
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
-import GlobalVar
+from GlobalVar import cf, beanBuilder, project_path
+from beanBuilder.ProjectBeanBuilder import ProjectBeanBuilder
 
 
-class BasicWorker:
+class BasicWorker(object):
     """
         所有类型的工人的基类，每一个分类的工人都应继承此基类
     """
@@ -23,10 +25,11 @@ class BasicWorker:
         self.workerNo = workerNo
         if logging.root.isEnabledFor(logging.DEBUG):
             logging.debug(f'worker(%s) 初始化!' % workerNo)
+        self.beanBuilder = ProjectBeanBuilder()
 
     def close(self):
         if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug(f'worker(%s) 销毁!' % self.workerNo)
+            logging.debug(f'worker(%s) 工作结束!' % self.workerNo)
         pass
 
     def getWorkerNo(self):
@@ -56,14 +59,15 @@ class BasicWorker:
         """
         pass
 
+    # todo 需要调整为DB存储
     def writeLog(self, itemNo, execLog, logLevel='debug'):
         if logging.root.isEnabledFor(logging.DEBUG):
             logging.debug("logLevel({0}) - itemNo({1}) execute mess:{2}".format(logLevel, itemNo, execLog))
 
         # 是否配置将日志写入文件
-        if GlobalVar.cf.get("worker", "isSaveExecLog")\
+        if cf.get("worker", "isSaveExecLog")\
                 or logLevel == 'error':
-            out = open(GlobalVar.project_path + '/export/executeLog.csv', 'a', newline='', encoding='utf-8')
+            out = open(project_path + '/export/executeLog.csv', 'a', newline='', encoding='utf-8')
             # 设定写入模式
             csv_write = csv.writer(out)
             # 写入具体内容
@@ -104,10 +108,10 @@ class BasicWebWorker(BasicWorker):
         # 去除浏览器自动测试软件的提示
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation']);
 
-        chrome_options.add_argument(GlobalVar.cf.get("workShop", "userAgent"))
-        if GlobalVar.cf.get("workShop", "executablePath"):
+        chrome_options.add_argument(cf.get("workShop", "userAgent"))
+        if cf.get("workShop", "executablePath"):
             self.driver = webdriver.Chrome(options=chrome_options,
-                                           executable_path=GlobalVar.cf.get("workShop", "executablePath"))
+                                           executable_path=cf.get("workShop", "executablePath"))
         else:
             self.driver = webdriver.Chrome(options=chrome_options)
 
@@ -141,10 +145,24 @@ class BasicWebWorker(BasicWorker):
         return True
 
     def logErrorMess(self, e, where):
-        logging.error('worker({0}) work occur:{1} on ({2})！'.format(self.workerNo, str(e), where))
+        mess = 'worker({0}) work occur:{1} on ({2})！'.format(self.workerNo, str(e), where)
+        logging.error(mess)
         logging.error("error mess:%s" % traceback.format_exc())
-        mess = where+':'+str(e)
         self.writeLog(self.workerNo, mess, 'error')
+
+    def saveScreenshot(self, screenName=None):
+        """
+        截图保存
+        :param screenName: 截图文件名，默认设置为当前workerNo.png
+        :return:
+        """
+        if screenName == None:
+            screenName = project_path + '/export/%s.png' % self.workerNo
+        self.driver.save_screenshot(screenName)
+
+    def sop(self):
+        workerBean = beanBuilder.getBeanByWorkerNo(self.workerNo)
+
 
 
 class ReportWorker(BasicWebWorker):
@@ -165,6 +183,7 @@ class ReportWorker(BasicWebWorker):
         self.report = report
 
     def logErrorMess(self, e, where):
-        logging.error('worker({0}) work for report({1}) occur:{2} on ({3})！'.format(self.workerNo, self.report.reportNo, str(e), where))
+        mess = 'worker({0}) work for report({1}) occur:{2} on ({3})！'.format(self.workerNo, self.report.reportNo, str(e), where)
+        logging.error(mess)
         logging.error("error mess:%s" % traceback.format_exc())
-        self.writeLog(self, self.report.reportNo, where+':'+str(e), 'error')
+        self.writeLog(self, self.report.reportNo, mess, 'error')

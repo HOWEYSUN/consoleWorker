@@ -1,14 +1,13 @@
 import logging
+import threading
 import time
-
+from GlobalVar import cf, decrypt
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-
-import GlobalVar
 from BasicWorker import BasicWebWorker
 
 
@@ -23,23 +22,23 @@ class TjManagementWorker(BasicWebWorker):
         # 14住我房
         # 0001自增编号
         super().__init__('WF01140001')
-        self.initUrl = 'https://passport.tujia.com/PortalSite/LoginPage/'
-        self.loginFlag = False
 
     """
     重写浏览器初始化方法，使用已打开的浏览器来操作
     """
     def initWebdrive(self):
+        self.loginFlag = False
+        self.initUrl = 'https://passport.tujia.com/PortalSite/LoginPage/'
         # todo =========写死的谷歌浏览器配置，后续应做成配置化============
         chrome_options = Options()
         # chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
         # 去除浏览器自动测试软件的提示
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation']);
 
-        chrome_options.add_argument(GlobalVar.cf.get("workShop", "userAgent"))
-        if GlobalVar.cf.get("workShop", "executablePath"):
+        chrome_options.add_argument(cf.get("workShop", "userAgent"))
+        if cf.get("workShop", "executablePath"):
             self.driver = webdriver.Chrome(options=chrome_options,
-                                           executable_path=GlobalVar.cf.get("workShop", "executablePath"))
+                                           executable_path=cf.get("workShop", "executablePath"))
         else:
             self.driver = webdriver.Chrome(options=chrome_options)
 
@@ -72,10 +71,10 @@ class TjManagementWorker(BasicWebWorker):
 
             self.driver.find_element_by_xpath(
                 '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[1]/input').send_keys(
-                GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'tj.userName')))
+                decrypt(cf.get('workShop', 'tj.userName')))
             self.driver.find_element_by_xpath(
                 '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/div[1]/div[2]/input').send_keys(
-                GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'tj.pwd')))
+                decrypt(cf.get('workShop', 'tj.pwd')))
             self.driver.find_element_by_xpath(
                 '//*[@id="app"]/section/section[1]/section[3]/section[1]/div[2]/button').click()
             self.loginFlag = True
@@ -107,7 +106,7 @@ class TjManagementWorker(BasicWebWorker):
         WebDriverWait(self.driver, 10) \
             .until(lambda x: x.find_element_by_xpath('//*[@id="app"]/div/nav/ul/li[1]/div/a')).click()
         self.writeLog(self.workerNo, '已跳转至订单列表')
-        self.driver.save_screenshot(GlobalVar.project_path + '/export/%s.png' % self.workerNo)
+        self.saveScreenshot()
         # self.driver.get('https://guanjia.tujia.com/trademanagement/orderlist')
 
     # 检测方法最好可以覆盖doJob中所有页面中的元素标识
