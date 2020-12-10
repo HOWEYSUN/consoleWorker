@@ -179,9 +179,13 @@ class BasicWebWorker(BasicWorker):
 
         for page in bean.pages:  # 遍历配置中的页面
             if page.url:
+                if logging.root.isEnabledFor(logging.DEBUG):
+                    logging.debug('跳转至页面（%s）' % page.url)
                 self.driver.get(page.url)  # 根据配置跳转至设置的URL
 
             if page.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+                if logging.root.isEnabledFor(logging.DEBUG):
+                    logging.debug('执行页面callback方法（%s）' % page.callback)
                 self.execCallbackFunc(self, page.callback)
 
             for location in page.locations:  # 遍历页面中的定位
@@ -192,17 +196,23 @@ class BasicWebWorker(BasicWorker):
                     element = self.driver.find_element(location.by, location.value)
 
                 if location.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+                    if logging.root.isEnabledFor(logging.DEBUG):
+                        logging.debug('执行定位callback方法（%s）' % location.callback)
                     self.execCallbackFunc(self, location.callback, element)
 
                 for action in location.actions:  # 遍历每个定位中的操作
                     if action.by is None:
                         continue
+                    if logging.root.isEnabledFor(logging.DEBUG):
+                        logging.debug('执行action动作（%s）' % action.by)
 
                     self.execCallbackFunc(element, action.by)
                     if action.timeSleep:  # 支持强制等待
                         time.sleep(int(action.timeSleep))
 
                     if action.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+                        if logging.root.isEnabledFor(logging.DEBUG):
+                            logging.debug('执行action callback方法（%s）' % action.callback)
                         self.execCallbackFunc(self, action.callback)
 
 

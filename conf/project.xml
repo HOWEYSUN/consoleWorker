@@ -43,4 +43,27 @@
             </location>
         </page>
     </bean>
+    <bean workerNo="WF01030001" name="wfhtWorker" modulePackage="consoleRobot.webWorker.wofang"
+          moduleName="WfhtWorker" >
+        <page name="initUrl" url="http://wfht.wofang.com/admin2.php/Public/login" desc="后台登录">
+            <location name="submitButton" by="xpath" value="//*[@id='myForm']/ul/li[3]/input[2]"
+                      waitUtil="True" waitTime="10" callback="doLogin" />
+        </page>
+        <page name="mainPage"  desc="进入后台主页">
+            <location name="fenxiaoReportTab" by="xpath" value="//*[@id='dinner-nav-side']/ul/li[2]/a"
+                      waitUtil="True" waitTime="10" >
+                <action by="click"/>
+            </location>
+            <location name="fenxiaoReportList" by="xpath" value="//*[@id='dinner-nav-side']/ul/li[2]/dl/dd[4]/a"
+                      waitUtil="True" waitTime="10" >
+                <action by="click" callback="switchIframe"/>
+            </location>
+        </page>
+        <page name="fenxiaoReportPage"  desc="进入分销报备列表页">
+            <location name="searchReportingList" by="xpath" value="//*[@id='form1']/div[2]/div[1]/div/div[3]/input">
+                <action by="click" timeSleep="10"/>
+            </location>
+        </page>
+        <page name="logout" url="http://wfht.wofang.com/admin2.php/Index/Public/logout" desc="退出登录"/>
+    </bean>
 </beans>
