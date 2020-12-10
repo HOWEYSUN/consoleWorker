@@ -52,7 +52,7 @@ class BasicWorker(object):
         """
         return True
 
-    def do(self):
+    def doBySop(self):
         """
             所有具体的实现类都必须重写此方法
         :return: 工作结果
@@ -160,7 +160,7 @@ class BasicWebWorker(BasicWorker):
             screenName = project_path + '/export/%s.png' % self.workerNo
         self.driver.save_screenshot(screenName)
 
-    def sop(self):
+    def doBySop(self):
         workerBean = beanBuilder.getBeanByWorkerNo(self.workerNo)
 
 

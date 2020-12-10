@@ -88,7 +88,7 @@ class TjManagementWorker(BasicWebWorker):
 
         return True
 
-    def do(self):
+    def doBySop(self):
         if not self.doLogin():
             self.writeLog(self.workerNo, '登录失败！', 'error')
             return False

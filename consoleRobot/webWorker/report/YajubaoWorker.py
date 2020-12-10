@@ -23,7 +23,7 @@ class YajubaoWorker(ReportWorker):
         # 001自增编号
         super().__init__('WF01040001', loginUrl, logoutUrl)
 
-    def do(self):
+    def doBySop(self):
         customer = self.report.customer
         project = self.report.project
 
@@ -72,7 +72,7 @@ class YajubaoWorker(ReportWorker):
         # 提交报备
         # self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[8]/form/button').click()
 
-        self.driver.save_screenshot(GlobalVar.project_path + '/export/%s.png' % self.report.reportNo)
+        self.saveScreenshot()
         self.writeLog(self.report.reportNo, '进入报备页面并拍照成功！')
 
     # 检测方法最好可以覆盖doJob中所有页面中的元素标识

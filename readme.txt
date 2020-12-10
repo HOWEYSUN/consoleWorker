@@ -50,3 +50,15 @@ WF01140001住我房tujia PC后台系统同步员
         reportLog：报备过程日志
               png: 结果拍照图片链接地址，若为多个结果则多个链接以英文逗号(,)相隔
          }
+
+=======说明==========
+1、conf配置文件
+2、consoleRobot工作程序文件
+3、export输出文件
+4、log日志文件
+5、test测试入口程序
+6、util工具类程序
+flaskApi对外api入口类
+GlobalVar全局变量类
+workshop工作间主程序
+pack打包程序

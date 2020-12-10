@@ -13,7 +13,7 @@ class BasicRobot:
 
     def doJob(self):
         if self.worker.Validated():
-            self.worker.do()
+            self.worker.doBySop()
         else:
             logging.error('worker(%s)参数校验不通过！' % self.workerNo)
             pass
