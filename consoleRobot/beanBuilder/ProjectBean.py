@@ -28,14 +28,15 @@ class Bean:
 
 
 class Page:
-    def __init__(self, name, url):
+    def __init__(self, name, url, desc):
         self.name = name
         self.url = url
+        self.desc = desc
         self.callback = None
         self.locations = []
 
     def __str__(self):
-        return "name:{}, url:{}, callback:{}".format(self.name, self.url, self.callback)
+        return "name:{}, url:{}, desc:{}, callback:{}".format(self.name, self.url, self.desc, self.callback)
 
     def __eq__(self, other) -> bool:
         return self.name == other.name

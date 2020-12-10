@@ -7,11 +7,18 @@
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
         <page name="mainPage" desc="进入后台主页">
-            <location name="mainPageUrl" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a"
-                      waitUtil="True" waitTime="10">
-                <action by="click" callback="tackScreenshot"/>
+            <location name="mainPageUrl" by="xpath" value="//*[@id='app']/section/div/div[2]/div/div[2]/div[2]/a"
+                      waitUtil="True" waitTime="10" >
+                <action by="click" callback="switchTab"/>
             </location>
         </page>
+        <page name="orderList" desc="进入订单列表">
+            <location name="orderListHref" by="xpath" value="//*[@id='app']/div/nav/ul/li[1]/div/a"
+                      waitUtil="True" waitTime="10" >
+                <action by="click" timeSleep='2' callback="saveScreenshot"/>
+            </location>
+        </page>
+        <page name="logout" desc="退出登录" callback="close" />
     </bean>
     <bean workerNo="WF01040001" name="yajubaoWorker" modulePackage="consoleRobot.webWorker.report"
           moduleName="YajubaoWorker" >
@@ -21,9 +28,9 @@
                       waitUtil="True" waitTime="10" callback="doLogin" />
         </page>
         <page name="searchPage" desc="搜索项目">
-            <location name="searchBar" by="css_selector" value=".search-like"
+            <location name="searchBar" by="css selector" value=".search-like"
                       waitUtil="True" waitTime="10" callback="doSearch" />
-            <location name="toReportButton" by="css_selector" value=".wxmessage-form-container__btn"
+            <location name="toReportButton" by="css selector" value=".wxmessage-form-container__btn"
                       waitUtil="True" waitTime="10">
                 <action by="click"/>
             </location>
@@ -31,8 +38,8 @@
         <page name="reportFormPage" desc="项目报备填报">
             <location name="desc" by="xpath" value="//*[@id='app']/div/div/div/div/div[6]/div/textarea"
                       waitUtil="True" waitTime="10" callback="setReportForm" />
-            <location name="formSubmit" by="xpath" value="//*[@id='app']/div/div/div/div/div[8]/form/button">
-                <action by="click" callback="tackScreenshot"/>
+            <location name="formSubmit" by="css selector" value=".zan-btn123">
+                <action by="click" callback="saveScreenshot"/>
             </location>
         </page>
     </bean>
