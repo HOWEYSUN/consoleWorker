@@ -3,10 +3,9 @@ import logging
 from logging import config
 from os import path
 
-from beanBuilder.ProjectBeanBuilder import ProjectBeanBuilder
 from util.prpcrypt import prpcrypt
 
-localProjectName = 'pythonProject'
+localProjectName = 'consoleWorker'
 root_path = path.join(path.dirname(__file__).split(localProjectName)[0])
 project_path = path.join(root_path, localProjectName)
 logConf_file_path = path.join(root_path, localProjectName+'/conf/logging.conf')
@@ -24,8 +23,6 @@ cf.read(projectConf_file_path)
 
 # 初始化加密类实例
 pc = prpcrypt(cf.get('project', 'robotKey'))
-beanBuilder = ProjectBeanBuilder()
-beanBuilder.initBeans()
 
 
 def decrypt(pText):

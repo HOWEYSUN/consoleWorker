@@ -1,4 +1,9 @@
 # utf-8
+import importlib
+import time
+
+from selenium.webdriver.support.wait import WebDriverWait
+
 from beanBuilder.BasicBeanBuilder import BasicBeanBuilder
 from beanBuilder.ProjectBean import Bean, Page, Location, Action
 
@@ -14,7 +19,7 @@ class ProjectBeanBuilder(BasicBeanBuilder):
     def initBeans(self):
         for beanElement in self.getAllBean():
             projectBean = self.initBean(beanElement)
-            self._beans.__setattr__(projectBean.workerNo, projectBean)
+            self._beans[projectBean.workerNo] = projectBean
 
     def initBean(self, beanElement):
         bean = Bean(beanElement.get('workerNo'), beanElement.get('name'),
@@ -27,7 +32,7 @@ class ProjectBeanBuilder(BasicBeanBuilder):
         return bean
 
     def initPage(self, pageElement):
-        page = Page(pageElement.get('name'), pageElement.get('url'))
+        page = Page(pageElement.get('name'), pageElement.get('url'), pageElement.get('desc'))
         if pageElement.get('callback'):
             page.setCallback(pageElement.get('callback'))
         for location in self.getAllLocations(pageElement):
@@ -52,14 +57,41 @@ class ProjectBeanBuilder(BasicBeanBuilder):
         return location
 
 
+#  单例模式
+beanBuilder = ProjectBeanBuilder()
+beanBuilder.initBeans()
+
 if __name__ == '__main__':
-    builder = ProjectBeanBuilder()
-    builder.initBeans()
-    for bean in builder.beans:
-        print(bean)
-        for page in bean.pages:
-            print(page)
-            for location in page.locations:
-                print(location)
-                for action in location.actions:
-                    print(action)
+    bean = beanBuilder.getBeanByWorkerNo('WF01140001')
+
+    workerModuleObj = importlib.import_module('.' + bean.moduleName, bean.modulePackage)
+    workerObj = getattr(workerModuleObj, bean.moduleName)
+    worker = workerObj()
+
+    for page in bean.pages:  # 遍历配置中的页面
+        if page.url:
+            worker.driver.get(page.url)  # 根据配置跳转至设置的URL
+
+        if page.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+            worker.execCallbackFunc(worker, page.callback)
+
+        for location in page.locations:  # 遍历页面中的定位
+            if location.waitUtil:  # 支持显式等待
+                element = WebDriverWait(worker.driver, int(location.waitTime)).until(
+                    lambda x: x.find_element(location.by, location.value))
+            else:
+                element = worker.driver.find_element(location.by, location.value)
+
+            if location.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+                worker.execCallbackFunc(worker, location.callback, element)
+
+            for action in location.actions:  # 遍历每个定位中的操作
+                if action.by is None:
+                    continue
+
+                worker.execCallbackFunc(element, action.by)
+                if action.timeSleep:  # 支持强制等待
+                    time.sleep(int(action.timeSleep))
+
+                if action.callback:  # 若存在回调函数则执行（注意：回调函数必须在当前类中存在！）
+                    worker.execCallbackFunc(worker, action.callback)

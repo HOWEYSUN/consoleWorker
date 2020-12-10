@@ -5,7 +5,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-import GlobalVar
+from GlobalVar import cf, decrypt
 from BasicWorker import ReportWorker
 
 
@@ -15,97 +15,11 @@ class YajubaoWorker(ReportWorker):
         主要处理雅居宝wap端的报备工作
     """
     def __init__(self):
-        loginUrl = 'https://webapp.mypaas.com.cn/b2c/yk_qmyx/prod/login?tenant_code=agile'
-        logoutUrl = loginUrl
         self.loginFlag = False
         # 01集团
         # 04客服中心
         # 001自增编号
-        super().__init__('WF01040001', loginUrl, logoutUrl)
-
-    def doBySop(self):
-        customer = self.report.customer
-        project = self.report.project
-
-        if not self.report.project:
-            logging.error('worker({}) 处理{}({})的报备信息缺少楼盘信息！'.format(self.workerNo, customer.name, customer.Id))
-            return False
-
-        self.writeLog(self.report.reportNo, '进入初始页({0}), 开始对{1}({2})的报备信息进行处理！'
-                      .format(self.initUrl, customer.name, customer.Id))
-        if not self.doLogin():
-            self.loginFlag = False
-            return False
-        try:
-            WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_css_selector('.search-like')).click()
-            self.driver.find_element_by_css_selector('.search-like').send_keys(project.name)
-            self.driver.find_element_by_css_selector('.icon-search').click()
-            self.writeLog(self.report.reportNo, '搜索%s项目' % project.name)
-            WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_css_selector('.wxmessage-form-container__btn')) \
-                .click()
-        except NoSuchElementException as ex:
-            self.logErrorMess(ex, 'search page')
-            return False
-        except Exception as e:
-            self.logErrorMess(e, 'search page')
-            return False
-
-        # =====================填写报备信息 start================
-        try:
-            WebDriverWait(self.driver, 10).until(
-                lambda x: x.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[6]/div/textarea')) \
-                .send_keys(customer.desc)
-            self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[2]/div[1]/input').send_keys(customer.name)
-            if int(customer.sex) == 0:
-                self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[2]/div').click()
-            else:
-                self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[1]/div').click()
-
-            self.driver.find_element_by_xpath('//input[@type="number"]').send_keys(customer.tel)
-        except NoSuchElementException as ex:
-            self.logErrorMess(ex, 'report submit page')
-            return False
-        except Exception as e:
-            self.logErrorMess(e, 'report submit page')
-            return False
-        # =====================填写报备信息 end================
-        # 提交报备
-        # self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[8]/form/button').click()
-
-        self.saveScreenshot()
-        self.writeLog(self.report.reportNo, '进入报备页面并拍照成功！')
-
-    # 检测方法最好可以覆盖doJob中所有页面中的元素标识
-    def check(self):
-        if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug('worker(%s) 检测中....' % self.workerNo)
-        # ======================登录页==========================
-        if not self.doLogin():
-            self.loginFlag = False
-            self.writeLog(self.report.reportNo, '登录失败！')
-            return False
-        # ======================登录页==========================
-
-        # ======================搜索页==========================
-        WebDriverWait(self.driver, 5).until(lambda x: x.find_element_by_css_selector('.search-like')).click()
-        if not super().checkElement(By.CSS_SELECTOR, '.search-like'):
-            return False
-
-        if not super().checkElement(By.CSS_SELECTOR, '.icon-search'):
-            return False
-
-        self.driver.find_element_by_css_selector('.search-like').click()
-        self.driver.find_element_by_css_selector('.search-like').send_keys('金沙湾')
-        self.driver.find_element_by_css_selector('.icon-search').click()
-        # ======================搜索页==========================
-
-        # ======================报备提交页==========================
-        time.sleep(2)
-        self.driver.find_element_by_css_selector('.wxmessage-form-container__btn').click()
-        # ======================报备提交页==========================
-        if logging.root.isEnabledFor(logging.DEBUG):
-            logging.debug('worker(%s) 检测完毕！' % self.workerNo)
-        return True
+        super().__init__('WF01040001')
 
     def Validated(self):
         if logging.root.isEnabledFor(logging.DEBUG):
@@ -132,26 +46,6 @@ class YajubaoWorker(ReportWorker):
 
         return True
 
-    def doLogin(self):
-        try:
-            super().doLogin()
-            WebDriverWait(self.driver, 10).until(lambda x: x.find_element_by_xpath('//input[@type="number"]')) \
-                .send_keys(GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'yajubao.userName')))
-            self.driver.find_element_by_xpath('//input[@type="password"]') \
-                .send_keys(GlobalVar.decrypt(GlobalVar.cf.get('workShop', 'yajubao.pwd')))
-            self.driver.find_element_by_xpath(
-                '//*[@id="app"]/div/div/div/div[2]/div[1]/div[2]/div[1]/form/button').click()
-            self.loginFlag = True
-            self.writeLog(self.report.reportNo, '登录成功')
-        except NoSuchElementException as ex:
-            self.logErrorMess(ex, 'doLogin function')
-            return False
-        except Exception as e:
-            self.logErrorMess(e, 'doLogin function')
-            return False
-
-        return True
-
     def close(self):
         # 若登录成功，则关闭时退出登录
         try:
@@ -161,4 +55,54 @@ class YajubaoWorker(ReportWorker):
             super().close()
         except Exception as e:
             self.logErrorMess(e, 'close function')
+            return False
+
+    def doLogin(self, waitElemet):
+        try:
+            waitElemet.send_keys(decrypt(cf.get('worker', 'yajubao.userName')))
+            self.driver.find_element_by_xpath('//input[@type="password"]') \
+                .send_keys(decrypt(cf.get('worker', 'yajubao.pwd')))
+            self.driver.find_element_by_xpath(
+                '//*[@id="app"]/div/div/div/div[2]/div[1]/div[2]/div[1]/form/button').click()
+            self.loginFlag = True
+            # self.writeLog(self.report.reportNo, '登录成功')
+        except NoSuchElementException as ex:
+            self.logErrorMess(ex, 'doLogin function')
+            return False
+        except Exception as e:
+            self.logErrorMess(e, 'doLogin function')
+            return False
+
+        return True
+
+    def doSearch(self, element):
+        try:
+            element.click()
+            self.driver.find_element_by_css_selector('.search-like').send_keys(self.report.project.name)
+            self.driver.find_element_by_css_selector('.icon-search').click()
+            # self.writeLog(self.report.reportNo, '搜索%s项目' % '金沙湾')
+        except NoSuchElementException as ex:
+            self.logErrorMess(ex, 'search page')
+            return False
+        except Exception as e:
+            self.logErrorMess(e, 'search page')
+            return False
+
+    def setReportForm(self, element):
+        try:
+            customer = self.report.customer
+            element.send_keys(customer.desc)
+            self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[2]/div[1]/input')\
+                .send_keys(customer.name)
+            if int(customer.sex) == 0:
+                self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[2]/div').click()
+            else:
+                self.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div[3]/div[2]/div[1]/div').click()
+
+            self.driver.find_element_by_xpath('//input[@type="number"]').send_keys(customer.tel)
+        except NoSuchElementException as ex:
+            self.logErrorMess(ex, 'report submit page')
+            return False
+        except Exception as e:
+            self.logErrorMess(e, 'report submit page')
             return False

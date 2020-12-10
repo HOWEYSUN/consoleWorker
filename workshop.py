@@ -9,8 +9,9 @@ import threading
 import time
 import traceback
 
-import GlobalVar
+from GlobalVar import cf
 from BasicRobot import BasicRobot
+from beanBuilder.ProjectBeanBuilder import beanBuilder
 from webWorker.report.ReportModel import Customer, BuildingProject, Report
 
 
@@ -20,15 +21,14 @@ class WorkShop:
        初始化需要指定员工类的全路径名（如报备类工作间为：baobeiWorkerPackage）
     """
 
-    def __init__(self, workerPackage):
-        self.workerPackage = workerPackage
+    def __init__(self):
         self.doneItems = []
 
     def addDoneItem(self, itemNo):
         # 当队列满时按设置移除之前的单号
-        if len(self.doneItems) > GlobalVar.cf.getint('workShop', 'maxQueue'):
+        if len(self.doneItems) > cf.getint('workShop', 'maxQueue'):
             # 移除队列前部的指定数量的单号
-            self.doneItems = self.doneItems[GlobalVar.cf.getint('workShop', 'popNum'):]
+            self.doneItems = self.doneItems[cf.getint('workShop', 'popNum'):]
         self.doneItems.append(itemNo)
         if logging.root.isEnabledFor(logging.DEBUG):
             logging.debug(f'doneItems(%s)' % self.doneItems)
@@ -59,10 +59,20 @@ class WorkShop:
         report.setCustomer(customer)
         report.setProject(project)
 
-        # 根据渠道ID来获取配置中指定的员工类
-        workerModuleName = GlobalVar.cf.get('api', channelNo)
-        workerModuleObj = importlib.import_module('.' + workerModuleName, self.workerPackage)
-        workerObj = getattr(workerModuleObj, workerModuleName)
+        # 根据渠道ID来获取配置中指定的员工编号
+        workerNo = cf.get('api', channelNo)
+
+        if workerNo is None:
+            logging.debug("channel(%s) map any worker!" % channelNo)
+
+        bean = beanBuilder.getBeanByWorkerNo(workerNo)
+
+        if bean is None:
+            logging.debug("worker(%s) 没有配置对应的SOP操作！" % workerNo)
+
+        #  todo 这里需要把调用的worker改成单例模式，不需要每次都进行实例化，使用时只需要每次初始化worker的参数即可
+        workerModuleObj = importlib.import_module('.' + bean.moduleName, bean.modulePackage)
+        workerObj = getattr(workerModuleObj, bean.moduleName)
         worker = workerObj()
         worker.setReport(report)
 
@@ -77,9 +87,6 @@ class WorkShop:
             logging.error("error mess:%s" % traceback.format_exc())
             worker.handleCvs(itemNo, 'failed')
 
-        time.sleep(2)
-        robot.close()
-
     def doTask(self, itemQueue):
         """
         工作台方法（消费者），工作者从此处获得操作单来进行work操作
@@ -88,7 +95,7 @@ class WorkShop:
         """
         while 1:
             if itemQueue.empty():
-                time.sleep(10)
+                time.sleep(int(cf.get('workShop','worker_work_freq')))
             self.work(itemQueue.get())  # 若队列中有待处理的单则取出处理
 
     def controller(self, itemQueue):
@@ -112,7 +119,7 @@ class WorkShop:
                             continue
                         self.addDoneItem(itemNo)  # 将需要处理的单号置为已处理 #todo 这里需要考虑操作失败时的策略
                         itemQueue.put(excel_data)  # 将需要处理的单号丢进队列里
-                time.sleep(30)
+                time.sleep(int(cf.get('workShop','controller_work_freq')))
 
 
 def initWorkShop(workerNum=0):
@@ -122,9 +129,9 @@ def initWorkShop(workerNum=0):
     :return: None
     """
     # 初始化日志配置
-    logging.config.fileConfig('conf/logging.conf')
+    # logging.config.fileConfig('conf/logging.conf')
     # 配置工作间工种
-    workerShop = WorkShop(GlobalVar.cf.get('workShop', 'reportWorkerPackage'))
+    workerShop = WorkShop()
     itemQueue = queue.Queue()
     threads = []
     # 创建监工线程
@@ -132,7 +139,7 @@ def initWorkShop(workerNum=0):
                                    args=(workerShop, itemQueue,))
     wokerThread.start()
     if workerNum <= 0:  # 若初始化工作者人数为负数或为空则从配置中获得
-        workerNum = GlobalVar.cf.getint('workShop', 'workerNum')
+        workerNum = cf.getint('workShop', 'workerNum')
 
     # 按配置开起工作者子线程
     for i in range(0, workerNum):
